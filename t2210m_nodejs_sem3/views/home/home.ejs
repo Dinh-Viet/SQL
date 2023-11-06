@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Product Management</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Product List</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Product Code</th>
+              <th>Product Name</th>
+              <th>Product Date</th>
+              <th>Product Origin Price</th>
+              <th>Quantity</th>
+              <th>Product Store Code</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% products.forEach(function(product) { %>
+              <tr>
+                <td><%= product.ProductCode %></td>
+                <td id="ProductName_<%= product.ProductCode %>"><%= product.ProductName %></td>
+                <td id="ProductDate_<%= product.ProductCode %>"><%= product.ProductDate.toDateString() %></td>
+                <td id="ProductOriginPrice_<%= product.ProductCode %>"><%= product.ProductOriginPrice %></td>
+                <td id="Quantity_<%= product.ProductCode %>"><%= product.Quantity %></td>
+                <td id="ProductStoreCode_<%= product.ProductCode %>"><%= product.ProductStoreCode %></td>
+                <td>
+                  <button class="btn btn-primary" onclick="editProduct('<%= product.ProductCode %>')">Edit</button>
+                  <button class="btn btn-danger" onclick="deleteProduct('<%= product.ProductCode %>')">Delete</button>
+                </td>
+              </tr>
+              <!-- Thêm các trường chỉnh sửa (ẩn đi ban đầu) cho mỗi trường thông tin sản phẩm -->
+              <tr id="EditRow_<%= product.ProductCode %>" style="display: none;">
+                <td><input type="text" id="EditProductCode_<%= product.ProductCode %>" value="<%= product.ProductCode %>" disabled></td>
+                <td><input type="text" id="EditProductName_<%= product.ProductCode %>" value="<%= product.ProductName %>"></td>
+                <td><input type="date" id="EditProductDate_<%= product.ProductCode %>" value="<%= product.ProductDate.toISOString().split('T')[0] %>"></td>
+                <td><input type="number" id="EditProductOriginPrice_<%= product.ProductCode %>" value="<%= product.ProductOriginPrice %>"></td>
+                <td><input type="number" id="EditQuantity_<%= product.ProductCode %>" value="<%= product.Quantity %>"></td>
+                <td><input type="text" id="EditProductStoreCode_<%= product.ProductCode %>" value="<%= product.ProductStoreCode %>"></td>
+                <td>
+                  <button class="btn btn-primary" onclick="updateProduct('<%= product.ProductCode %>')">Update</button>
+                  <button class="btn btn-secondary" onclick="cancelEdit('<%= product.ProductCode %>')">Cancel</button>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+      
+  <div class="container mt-4">
+    <h2>Add Product</h2>
+    <form id="addProductForm">
+      <div class="form-group">
+        <label for="ProductCode">Product Code:</label>
+        <input type="text" class="form-control" id="ProductCode" name="ProductCode" required>
+      </div>
+      <div class="form-group">
+        <label for="ProductName">Product Name:</label>
+        <input type="text" class="form-control" id="ProductName" name="ProductName" required>
+      </div>
+      <div class="form-group">
+        <label for="ProductDate">Product Date:</label>
+        <input type="date" class="form-control" id="ProductDate" name="ProductDate" required>
+      </div>
+      <div class="form-group">
+        <label for="ProductOriginPrice">Product Origin Price:</label>
+        <input type="number" class="form-control" id="ProductOriginPrice" name="ProductOriginPrice" required>
+      </div>
+      <div class="form-group">
+        <label for="Quantity">Quantity:</label>
+        <input type="number" class="form-control" id="Quantity" name="Quantity" required>
+      </div>
+      <div class="form-group">
+        <label for="ProductStoreCode">Product Store Code:</label>
+        <input type="text" class="form-control" id="ProductStoreCode" name="ProductStoreCode" required>
+      </div>
+      <button type="button" class="btn btn-primary" onclick="addProduct()">Add Product</button>
+    </form>
+  </div>
+
+  <script>
+    let currentProductCode = null; // Lưu trữ mã sản phẩm đang được chỉnh sửa
+
+    function addProduct() {
+      const productData = {
+        ProductCode: document.getElementById("ProductCode").value,
+        ProductName: document.getElementById("ProductName").value,
+        ProductDate: document.getElementById("ProductDate").value,
+        ProductOriginPrice: document.getElementById("ProductOriginPrice").value,
+        Quantity: document.getElementById("Quantity").value,
+        ProductStoreCode: document.getElementById("ProductStoreCode").value
+      };
+
+      fetch("/auth/add-product", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(productData)
+      })
+      .then(response => {
+        if (response.ok) {
+          location.reload();
+        } else {
+          alert("Failed to add the product.");
+        }
+      });
+    }
+
+    function editProduct(productCode) {
+      if (currentProductCode) {
+        // Nếu có một sản phẩm khác đang được chỉnh sửa, hủy chỉnh sửa trước
+        cancelEdit(currentProductCode);
+      }
+
+      currentProductCode = productCode;
+
+      // Ẩn thông tin sản phẩm và hiển thị các trường chỉnh sửa tương ứng
+      document.getElementById(`ProductName_${productCode}`).style.display = "none";
+      document.getElementById(`ProductDate_${productCode}`).style.display = "none";
+      document.getElementById(`ProductOriginPrice_${productCode}`).style.display = "none";
+      document.getElementById(`Quantity_${productCode}`).style.display = "none";
+      document.getElementById(`ProductStoreCode_${productCode}`).style.display = "none";
+
+      document.getElementById(`EditRow_${productCode}`).style.display = "table-row";
+    }
+
+    function cancelEdit(productCode) {
+      currentProductCode = null;
+
+      // Hiển thị lại thông tin sản phẩm và ẩn các trường chỉnh sửa
+      document.getElementById(`ProductName_${productCode}`).style.display = "table-cell";
+      document.getElementById(`ProductDate_${productCode}`).style.display = "table-cell";
+      document.getElementById(`ProductOriginPrice_${productCode}`).style.display = "table-cell";
+      document.getElementById(`Quantity_${productCode}`).style.display = "table-cell";
+      document.getElementById(`ProductStoreCode_${productCode}`).style.display = "table-cell";
+
+      document.getElementById(`EditRow_${productCode}`).style.display = "none";
+    }
+
+    function updateProduct(productCode) {
+      const newProductName = document.getElementById(`EditProductName_${productCode}`).value;
+      const newProductDate = document.getElementById(`EditProductDate_${productCode}`).value;
+      const newProductOriginPrice = document.getElementById(`EditProductOriginPrice_${productCode}`).value;
+      const newQuantity = document.getElementById(`EditQuantity_${productCode}`).value;
+      const newProductStoreCode = document.getElementById(`EditProductStoreCode_${productCode}`).value;
+
+      const productData = {
+        ProductName: newProductName,
+        ProductDate: newProductDate,
+        ProductOriginPrice: newProductOriginPrice,
+        Quantity: newQuantity,
+        ProductStoreCode: newProductStoreCode
+      };
+
+      fetch(`/auth/update-product/${productCode}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(productData)
+      })
+      .then(response => {
+        if (response.ok) {
+          location.reload();
+        } else {
+          alert("Failed to update the product.");
+        }
+      });
+    }
+
+    function deleteProduct(productCode) {
+      if (confirm("Are you sure you want to delete this product?")) {
+        fetch(`/auth/delete-product/${productCode}`, {
+          method: "DELETE"
+        })
+        .then(response => {
+          if (response.ok) {
+            location.reload();
+          } else {
+            alert("Failed to delete the product.");
+          }
+        });
+      }
+    }
+  </script>
+</body>
+</html>
