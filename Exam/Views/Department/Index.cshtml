@@ -1,0 +1,31 @@
+﻿@model IEnumerable<exam.Models.DepartmentModel>
+
+<h2>Departments</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Department Code</th>
+            <th>Department Name</th>
+            <th>Location</th>
+            <th>Number of Personals</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var department in Model)
+        {
+            <tr>
+                <td>@department.DepartmentCode</td>
+                <td>@department.DepartmentName</td>
+                <td>@department.Location</td>
+                <td>@department.NumberOfPersonals</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@department.Id">Details</a> |
+                    <a asp-action="Edit" asp-route-id="@department.Id">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@department.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

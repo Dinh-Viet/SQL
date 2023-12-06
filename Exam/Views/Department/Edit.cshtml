@@ -1,0 +1,19 @@
+﻿
+@model exam.Models.DepartmentModel
+
+<h2>Edit Department</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label asp-for="DepartmentCode"></label>
+        <input asp-for="DepartmentCode" class="form-control" />
+        <span asp-validation-for="DepartmentCode" class="text-danger"></span>
+    </div>
+    <!-- Add similar form fields for other properties -->
+
+    <div class="form-group">
+        <input type="submit" value="Save Changes" class="btn btn-primary" />
+    </div>
+</form>
